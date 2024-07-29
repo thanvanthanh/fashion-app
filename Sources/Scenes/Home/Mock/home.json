@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "collection": {
+      "id": 1,
+      "listCollection": ["banner_1","banner_1","banner_1"]
+    },
+    "newArrival": {
+      "id": 1,
+      "image": "image1.png",
+      "name": "New Dress",
+      "price": "$99.99",
+      "type": "Dress"
+    }
+  }
+]
