@@ -14,7 +14,7 @@ class SearchTableViewCell: UITableViewCell {
     @IBOutlet private weak var nameLabel: UILabel!
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+        selectionStyle = .none
         avatarImage.layer.cornerRadius = avatarImage.frame.width / 2
     }
     

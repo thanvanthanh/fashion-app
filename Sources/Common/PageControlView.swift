@@ -11,12 +11,10 @@ final class PageControlView: UIView {
     
     private var numberOfPages: Int = 0
     private var currentPage: Int = 0
-    private var dotColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.2)
-    private var currentDotColor = UIColor(hexString: "#0C80E4")
     
     private let space: CGFloat = 4
-    private let dotWidth: CGFloat = 6
-    private let dotHeight: CGFloat = 6
+    private let dotWidth: CGFloat = 10
+    private let dotHeight: CGFloat = 10
     private let selectedWidth: CGFloat = 20
     private let mainStackView = UIStackView()
 
@@ -66,13 +64,16 @@ final class PageControlView: UIView {
         mainStackView.removeFullyAllArrangedSubviews()
         for i in 0 ..< self.numberOfPages {
             let dot = UIImageView()
-            dot.layer.cornerRadius = dotWidth / 2
-            dot.image = i == currentPage ? UIImage(named: "img_current_page_bg") : nil
-            dot.backgroundColor = i == currentPage ? currentDotColor : dotColor
+            
+            dot.image = i == currentPage
+            ? UIImage(asset: Asset.AssetsIOS.iconRectangleCurrent)
+            : UIImage(asset: Asset.AssetsIOS.iconRectangle)
+            
+            dot.backgroundColor = .clear
             mainStackView.addArrangedSubview(dot)
             dot.translatesAutoresizingMaskIntoConstraints = false
             
-            dot.widthAnchor.constraint(equalToConstant: i == currentPage ? selectedWidth : dotWidth).isActive = true
+            dot.widthAnchor.constraint(equalToConstant: dotWidth).isActive = true
         }
     }
     

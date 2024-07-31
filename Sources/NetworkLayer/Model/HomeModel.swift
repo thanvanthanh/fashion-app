@@ -13,6 +13,11 @@ struct HomeModel: Decodable, Identifiable {
     var newArrival: NewArrivalHomeModel
 }
 
+enum HomeItem: Hashable {
+    case collection(CollectionHomeModel)
+    case newArrival(NewArrivalHomeModel)
+}
+
 extension HomeModel: Hashable {
     static func == (lhs: HomeModel, rhs: HomeModel) -> Bool {
         return lhs.id == rhs.id

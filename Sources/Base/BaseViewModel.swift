@@ -6,26 +6,53 @@
 //
 
 import Foundation
-import Combine
+import RxSwift
+import RxCocoa
+import NSObject_Rx
+import Moya
 
 class BaseViewModel: NSObject {
     
-    // Track Error
-    let errorIndicator = ErrorIndicator()
-    lazy var errorPublisher = errorIndicator.errors.eraseToAnyPublisher()
+    let error = ErrorTracker()
+    let loading = ActivityIndicator()
+    let headerLoading = ActivityIndicator()
+    let footerLoading = ActivityIndicator()
     
-    // Track Loading
-    let activityIndicator = ActivityIndicator()
-    lazy var loadingPublisher = activityIndicator.loading.eraseToAnyPublisher()
+    let isLoading = BehaviorRelay<Bool>(value: false)
+    let isHeaderLoading = BehaviorRelay<Bool>(value: false)
+    let isFooterLoading = BehaviorRelay<Bool>(value: false)
+    
         
     override init() {
         super.init()
+        
+        error
+            .asObservable()
+            .subscribe(onNext: { error in
+                if let error = error as? AppError {
+                    print(error.localizedDescription)
+                } else if let error = error as? RxError {
+                    switch error {
+                    case .timeout:
+                        AppHelper.showMessage(message: MessageHelper.serverError.timeOut)
+                    default: return
+                    }
+                } else if let error = error as? MoyaError {
+                    switch error {
+                    case .objectMapping(_, let response), .jsonMapping(let response), .statusCode(let response):
+                        print(response)
+                    default:
+                        return
+                    }
+                } else {
+                    print(error.localizedDescription)
+                }
+            })
+            .disposed(by: rx.disposeBag)
+    }
+    
+    deinit {
+        print("\(type(of: self)): Deinited")
     }
 }
 
-protocol ViewModelType {
-    associatedtype Input
-    associatedtype Output
-    
-    func transform(_ input: Input, _ disposeBag: DisposeBag) -> Output
-}

@@ -1,3 +1,7 @@
+//
+// Copyright © 2021 An Tran. All rights reserved.
+//
+
 import Foundation
 
 /// The default time values used for leak detection expectations.

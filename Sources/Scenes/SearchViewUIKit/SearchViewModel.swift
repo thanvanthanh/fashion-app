@@ -5,62 +5,41 @@
 //  Created by Thân Văn Thanh on 30/08/2023.
 //
 
-import Combine
+import RxSwift
 import Foundation
+import RxCocoa
 
-class SearchViewModel: BaseViewModel {
-    let getSearchData: SearchServiceProtocol
+final class SearchViewModel: BaseViewModel {
     
-    init(getSearchData: SearchServiceProtocol) {
-        self.getSearchData = getSearchData
+    private let repo: SearchRequest
+    
+    init(repo: SearchRequest) {
+        self.repo = repo
     }
 }
 
 extension SearchViewModel: ViewModelType {
+    
     struct Input {
-        let loadTrigger: AnyPublisher<Void, Never>
-        let searchTrigger: AnyPublisher<String, Never>
-        let selectUserTrigger: AnyPublisher<IndexPath, Never>
+        let trigger: Driver<String>
+        let searchTrigger: Driver<String>
     }
     
-    final class Output: ObservableObject {
-        @Published var response: ItemSearchResponse?
-        @Published var isLoading = false
-        @Published var error: Error?
+    struct Output {
+        let searchResponse: Driver<[SearchModel]>
     }
     
-    func transform(_ input: Input, _ disposeBag: DisposeBag) -> Output {
-        let output = Output()
-        
-        input.loadTrigger
-            .flatMap {
-                self.getSearchData
-                    .search(username: "thanvanthanh")
-                    .trackError(self.errorIndicator)
-                    .trackActivity(self.activityIndicator)
-                    .eraseToAnyPublisher()
+    func transform(_ input: Input) -> Output {
+        let searchResponse = input.searchTrigger
+            .flatMapLatest { [weak self] searchText -> Driver<[SearchModel]> in
+                guard let self else { return .empty() }
+                return self.repo.search(username: searchText)
+                    .map( { $0.items ?? [] })
+                    .trackActivity(self.loading)
+                    .asDriverOnErrorJustComplete()
             }
-            .assign(to: \.response, on: output)
-            .store(in: disposeBag)
         
-        input.searchTrigger
-            .flatMap {
-                self.getSearchData
-                    .search(username: $0)
-                    .trackError(self.errorIndicator)
-                    .trackActivity(self.activityIndicator)
-                    .eraseToAnyPublisher()
-            }
-            .assign(to: \.response, on: output)
-            .store(in: disposeBag)
-        
-        input.selectUserTrigger
-            .sink {
-                let user = output.response?.items?[$0.row]
-                DetailViewCoordinator.shared.start(data: user)
-            }
-            .store(in: disposeBag)
-        
-        return output
+        return Output(searchResponse: searchResponse)
     }
 }
+

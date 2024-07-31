@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="gTV-IL-0wX" customClass="FilterCollectionViewCell" customModule="Base_ios" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="180" height="67"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="180" height="67"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="Cfk-E2-MSX">
+                        <rect key="frame" x="0.0" y="0.0" width="180" height="67"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IEm-Cm-Yyw">
+                                <rect key="frame" x="0.0" y="0.0" width="180" height="33.666666666666664"/>
+                                <fontDescription key="fontDescription" name="TimesNewRomanPSMT" family="Times New Roman" pointSize="16"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pbQ-DT-DlD">
+                                <rect key="frame" x="0.0" y="33.666666666666657" width="180" height="33.333333333333343"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon_rectangle_filter" translatesAutoresizingMaskIntoConstraints="NO" id="9YT-T0-g0U">
+                                        <rect key="frame" x="87.666666666666671" y="14" width="5" height="5"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="5" id="NKd-SH-AYp"/>
+                                            <constraint firstAttribute="width" constant="5" id="oxz-zQ-WXf"/>
+                                        </constraints>
+                                    </imageView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="9YT-T0-g0U" firstAttribute="centerY" secondItem="pbQ-DT-DlD" secondAttribute="centerY" id="0DE-C2-FP5"/>
+                                    <constraint firstItem="9YT-T0-g0U" firstAttribute="centerX" secondItem="pbQ-DT-DlD" secondAttribute="centerX" id="DbS-5o-hOt"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                    </stackView>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstItem="Cfk-E2-MSX" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="6b3-y5-z1W"/>
+                <constraint firstAttribute="trailing" secondItem="Cfk-E2-MSX" secondAttribute="trailing" id="8qr-2G-L4V"/>
+                <constraint firstAttribute="bottom" secondItem="Cfk-E2-MSX" secondAttribute="bottom" id="kce-LJ-hmE"/>
+                <constraint firstItem="Cfk-E2-MSX" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="va5-zm-6lC"/>
+            </constraints>
+            <size key="customSize" width="180" height="67"/>
+            <connections>
+                <outlet property="filterTitle" destination="IEm-Cm-Yyw" id="1wr-37-tcp"/>
+                <outlet property="selectedImage" destination="9YT-T0-g0U" id="Tf0-Vu-RMM"/>
+            </connections>
+            <point key="canvasLocation" x="80.916030534351137" y="-5.2816901408450709"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="icon_rectangle_filter" width="6" height="6"/>
+    </resources>
+</document>

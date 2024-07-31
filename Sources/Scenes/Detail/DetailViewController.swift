@@ -22,19 +22,10 @@ final class DetailViewController: BaseViewController {
         super.bindViewModel()
         guard let viewmodel = viewModel as? DetailViewModel else { return }
         
-        let input = DetailViewModel.Input(loadTrigger: Just(()).eraseToAnyPublisher())
-        let output = viewmodel.transform(input, disposeBag)
-        
-        output.$detail.subscribe(detailSubscriber)
+        nameTitle.text = viewmodel.repo.login
+        avatarImage.sd_setImage(with: URL(string: viewmodel.repo.avatarUrl))
     }
 
 }
 
-extension DetailViewController {
-    private var detailSubscriber: Binder<SearchModel?> {
-        Binder(self) { vc, data in
-            vc.nameTitle.text = data?.login
-            vc.avatarImage.sd_setImage(with: URL(string: data?.avatarUrl ?? ""))
-        }
-    }
-}
+

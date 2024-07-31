@@ -1,3 +1,7 @@
+//
+// Copyright © 2021 An Tran. All rights reserved.
+//
+
 import Foundation
 import Metal
 
@@ -125,13 +129,10 @@ public extension WeakReference where ReferenceType: Equatable {
 
 public extension WeakReference where ReferenceType: Hashable {
     
-    func hash(into hasher: inout Hasher) {
-            if let ref = ref {
-                hasher.combine(ref)
-            } else {
-                hasher.combine(Int.min)
-            }
-        }
+    var hashValue: Int {
+        guard let ref = ref else { return Int.min }
+        return ref.hashValue
+    }
 }
 
 /// A generic wrapper type to keep a weak reference to an object.

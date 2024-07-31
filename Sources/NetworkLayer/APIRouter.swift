@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Alamofire
+import Moya
 
 enum APIRouter {
     case search(username: String)
@@ -14,20 +14,28 @@ enum APIRouter {
 }
 
 extension APIRouter: TargetType {
-    var baseUrl: String {
-        return Configs.share.env.baseURL
+    var baseURL: URL {
+        return URL(string: Configs.share.env.baseURL)! // swiftlint:disable:this force_unwrapping
     }
     
-    var path: RequestType {
+    var path: String {
         switch self {
-        case .search:
-            return .requestPath(path: "/search/users")
-        case .refreshToken:
-            return .requestPath(path: "/auth/refresh")
+        case .search(let username):
+            return "/search/users"
+        case .refreshToken(let token):
+            return "/auth/refresh"
         }
     }
     
-    var method: HTTPMethod {
+    var headers: [String : String]? {
+        switch self {
+        default :
+            return ["Content-Type":"application/json",
+                    "accept":"application/json"]
+        }
+    }
+    
+    var method: Moya.Method {
         switch self {
         case .search:
             return .get
@@ -44,14 +52,5 @@ extension APIRouter: TargetType {
             return .requestParameters(parameters: ["refresh_token": token], encoding: URLEncoding.default)
         }
     }
-    
-    var header: [String : String]? {
-        switch self {
-        default :
-            return ["Content-Type":"application/json",
-                    "accept":"application/json"]
-        }
-    }
-    
     
 }

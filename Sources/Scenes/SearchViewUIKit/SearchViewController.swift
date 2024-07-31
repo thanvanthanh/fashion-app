@@ -6,7 +6,8 @@
 //
 
 import UIKit
-import Combine
+import RxSwift
+import RxCocoa
 
 final class SearchViewController: BaseViewController {
     
@@ -17,16 +18,7 @@ final class SearchViewController: BaseViewController {
     @IBOutlet private weak var searchBar: UISearchBar!
     @IBOutlet private weak var tableView: UITableView!
     
-    private var dataSource: UITableViewDiffableDataSource<Section, SearchModel>? = nil
-    
-    private let searchTrigger = PassthroughSubject<String, Never>()
-    private let selectUserTrigger = PassthroughSubject<IndexPath, Never>()
-    
-    var data: ItemSearchResponse? {
-        didSet {
-            tableView.reloadData()
-        }
-    }
+    private let searchTextSubject = PublishSubject<String>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,66 +33,43 @@ final class SearchViewController: BaseViewController {
     }
     
     private func configDataSource() {
-        dataSource = UITableViewDiffableDataSource<Section, SearchModel>(tableView: tableView, cellProvider: { tableView, indexPath, itemIdentifier in
-            let cell = tableView.dequeueReusableCell(cell: SearchTableViewCell.self, indexPath: indexPath)
-            cell.accessoryType = .disclosureIndicator
-            cell.config(data: itemIdentifier)
-            return cell
-        })
-        dataSource?.defaultRowAnimation = .fade
+        
     }
     
     private func setupTableView() {
         tableView.register(cell: SearchTableViewCell.self)
-        tableView.delegate = self
     }
     
     override func bindViewModel() {
         super.bindViewModel()
         guard let viewmodel = viewModel as? SearchViewModel else { return }
         
-        let input = SearchViewModel.Input(
-            loadTrigger: Just(()).eraseToAnyPublisher(),
-            searchTrigger: searchTrigger
-                .throttle(for: 1, scheduler: RunLoop.main, latest: true)
-                .eraseToAnyPublisher(),
-            selectUserTrigger: selectUserTrigger.eraseToAnyPublisher()
-        )
+        let input = SearchViewModel.Input(trigger: Driver.just("thanvanthanh"),
+                                          searchTrigger: searchTextSubject.asDriverOnErrorJustComplete())
+        let output = viewmodel.transform(input)
         
-        let output = viewmodel.transform(input, disposeBag)
-        output.$response
-            .subscribe(repoSubscriber)
-    }
-}
-
-extension SearchViewController {
-    private var repoSubscriber: Binder<ItemSearchResponse?> {
-        Binder(self) { vc, repos in
-            var snapshot = NSDiffableDataSourceSnapshot<Section, SearchModel>()
-            snapshot.appendSections([.main])
-            snapshot.appendItems(repos?.items ?? [], toSection: .main)
-            vc.dataSource?.apply(snapshot, animatingDifferences: true)
-            DispatchQueue.main.async {
-                guard let repoList = repos?.items else { return }
-                repoList.isEmpty
-                ? vc.tableView.setNoDataView(content: "No Data", icons: "")
-                : vc.tableView.removeNodataView()
-            }
+        output.searchResponse
+            .drive(tableView.rx.items(cellIdentifier: SearchTableViewCell.cellId,
+                                      cellType: SearchTableViewCell.self))
+        { row, element, cell in
+            cell.config(data: element)
         }
-    }
-}
-
-extension SearchViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        searchBar.endEditing(true)
-        selectUserTrigger.send(indexPath)
+        ~ rx.disposeBag
+        
+        tableView
+            .rx
+            .modelSelected(SearchModel.self)
+            .do(onNext: { user in
+                DetailViewCoordinator.shared.start(data: user)
+            })
+            .subscribe()
+        ~ rx.disposeBag
     }
 }
 
 extension SearchViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        searchTrigger.send(searchText)
+        searchTextSubject.onNext(searchText)
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -108,6 +77,6 @@ extension SearchViewController: UISearchBarDelegate {
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        searchTrigger.send("")
+        searchTextSubject.onNext("")
     }
 }

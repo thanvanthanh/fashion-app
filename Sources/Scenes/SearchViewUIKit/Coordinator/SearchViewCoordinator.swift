@@ -12,7 +12,7 @@ final class SearchViewCoordinator: Coordinator {
     func start(data: Any?) {
         guard let window = data as? UIWindow else { return }
         let vc = SearchViewController()
-        vc.viewModel = SearchViewModel(getSearchData: SearchRequest())
+        vc.viewModel = SearchViewModel(repo: SearchRequest())
         let nav = UINavigationController(rootViewController: vc)
         window.rootViewController = nav
         window.makeKeyAndVisible()

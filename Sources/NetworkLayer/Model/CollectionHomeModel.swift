@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CollectionHomeModel: Decodable, Identifiable {
+struct CollectionHomeModel: Decodable, Hashable {
     let id: Int
     let listCollection: [String]
 }

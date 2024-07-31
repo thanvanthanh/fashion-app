@@ -3,10 +3,10 @@
     "id": 1,
     "collection": {
       "id": 1,
-      "listCollection": ["banner_1","banner_1","banner_1"]
+      "listCollection": ["banner_1","banner_2","banner_3","banner_4"]
     },
     "newArrival": {
-      "id": 1,
+      "id": 2,
       "image": "image1.png",
       "name": "New Dress",
       "price": "$99.99",

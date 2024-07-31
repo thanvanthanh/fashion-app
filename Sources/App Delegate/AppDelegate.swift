@@ -13,40 +13,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     
-    private var bag = DisposeBag()
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         self.window = UIWindow(frame: UIScreen.main.bounds)
         guard let window = window else { return true }
-        HomeViewCoordinator.shared.start(data: window)
+        SearchViewCoordinator.shared.start(data: window)
         
-        AFNetworking.shared.listenForReachability()
+        //AFNetworking.shared.listenForReachability()
         
         // Leak Detector
-        configLeakDetector()
+         configLeakDetector()
         return true
     }
     
     private func configLeakDetector() {
-        LeakDetector.instance.isEnabled = false
-        
         LeakDetector.instance.status
-            .sink(
-                receiveValue: { status in
-                    print("LeakDetector \(status)")
+            .subscribe(
+                onNext: { status in
+                    print("LeakDetectorRxSwift \(status)")
                 }
             )
-            .store(in: bag)
+            .disposed(by: rx.disposeBag)
         
         LeakDetector.instance.isLeaked
-            .sink { message in
-                if let message = message {
-                    print("LEAK \(message)")
+            .subscribe(
+                onNext: { message in
+                    if let message = message {
+                        print("LEAK \(message)")
+                    }
                 }
-            }
-            .store(in: bag)
-        
+            )
+            .disposed(by: rx.disposeBag)
     }
 
 }

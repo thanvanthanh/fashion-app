@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NewArrivalHomeModel: Decodable, Identifiable {
+struct NewArrivalHomeModel: Decodable, Hashable {
     let id: Int
     var image: String
     var name: String

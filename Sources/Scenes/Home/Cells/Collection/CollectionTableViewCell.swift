@@ -42,20 +42,25 @@ class CollectionTableViewCell: UITableViewCell {
     
     @objc
     func timerAction() {
-        let desiredScrollPosition = (currentIndex < listImage.count - 1) ? currentIndex + 1 : 0
-        collectionView.scrollToItem(at: IndexPath(item: desiredScrollPosition, section: 0),
-                                    at: .centeredHorizontally,
-                                    animated: true)
-        pageControl.setCurrentPage(currentIndex)
+        let nextIndex = (currentIndex + 1) % listImage.count
+        collectionView.scrollToItem(at: IndexPath(item: nextIndex, section: 0), at: .centeredHorizontally, animated: true)
     }
     
     func config(image: [String]) {
-        listImage = image
-        pageControl.setNumberOfPage(listImage.count)
+        listImage = [image.last ?? ""] + image + [image.first ?? ""]
+        pageControl.setNumberOfPage(image.count)
         collectionView.reloadData()
+        DispatchQueue.main.async {
+            let initialIndex = 1
+            self.currentIndex = initialIndex
+            self.collectionView.scrollToItem(at: IndexPath(item: initialIndex, section: 0), at: .centeredHorizontally, animated: false)
+        }
     }
     
-    
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
     
     @IBAction func exploreAction(_ sender: UIButton) {
     }
@@ -68,9 +73,10 @@ extension CollectionTableViewCell: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let actualIndex = indexPath.item % listImage.count
         let cell = collectionView.dequeueReusableCell(cell: CollectionIntroductionCellCollectionViewCell.self,
                                                       indexPath: indexPath)
-        cell.config(image: listImage[indexPath.row])
+        cell.config(image: listImage[actualIndex])
         return cell
     }
 }
@@ -93,5 +99,53 @@ extension CollectionTableViewCell: UICollectionViewDelegateFlowLayout {
                         layout collectionViewLayout: UICollectionViewLayout,
                         minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return 0
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        updateCurrentIndex()
+        adjustScrollPositionIfNeeded()
+    }
+    
+    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        updateCurrentIndex()
+        adjustScrollPositionIfNeeded()
+    }
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.stopTimer()
+    }
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        self.startTimer()
+    }
+    
+    private func updateCurrentIndex() {
+        let visibleRect = CGRect(origin: collectionView.contentOffset, size: collectionView.bounds.size)
+            let visiblePoint = CGPoint(x: visibleRect.midX, y: visibleRect.midY)
+            if let visibleIndexPath = collectionView.indexPathForItem(at: visiblePoint) {
+                currentIndex = visibleIndexPath.item
+                
+                // Adjust actual index calculation
+                let actualIndex: Int
+                if currentIndex == 0 {
+                    actualIndex = listImage.count - 3 // Last actual item
+                } else if currentIndex == listImage.count - 1 {
+                    actualIndex = 0 // First actual item
+                } else {
+                    actualIndex = currentIndex - 1
+                }
+                
+                pageControl.setCurrentPage(actualIndex)
+            }
+    }
+    
+    private func adjustScrollPositionIfNeeded() {
+        if currentIndex == 0 {
+            collectionView.scrollToItem(at: IndexPath(item: listImage.count - 2, section: 0), at: .centeredHorizontally, animated: false)
+            currentIndex = listImage.count - 2
+        } else if currentIndex == listImage.count - 1 {
+            collectionView.scrollToItem(at: IndexPath(item: 1, section: 0), at: .centeredHorizontally, animated: false)
+            currentIndex = 1
+        }
     }
 }

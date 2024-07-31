@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Combine
 
 final class HomeViewCoordinator: Coordinator {
     static let shared = HomeViewCoordinator()
@@ -26,7 +25,8 @@ class HomeViewController: BaseViewController {
     
     // MARK: - Properties
     enum Section: Int, Hashable {
-        case main
+        case collection
+        case newArrival
     }
     
     var dataSource: UITableViewDiffableDataSource<Section, HomeModel>? = nil
@@ -39,6 +39,7 @@ class HomeViewController: BaseViewController {
         super.setupUI()
         setupTableView()
         configureDataSource()
+        setupNavigationBar()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -50,15 +51,7 @@ class HomeViewController: BaseViewController {
         
         guard let viewModel = viewModel as? HomeViewModel else { return }
         
-        let input = HomeViewModel.Input(
-            loadTrigger: Just(()).eraseToAnyPublisher())
-        
-        let output = viewModel.transform(input, disposeBag)
-        output.$response
-            .subscribe(repoSubscriber)
     }
-    
-
 }
 
 // MARK: - Private
@@ -72,24 +65,39 @@ private extension HomeViewController {
     
     func configureDataSource() {
         dataSource = UITableViewDiffableDataSource<Section, HomeModel>(tableView: tableView) { tableView, indexPath, itemIdentifier in
-            print(itemIdentifier)
-            print(indexPath)
-            
-            switch indexPath.row {
-            case 0:
+            switch Section(rawValue: indexPath.section) {
+            case .collection:
                 let cell = tableView.dequeueReusableCell(
                     cell: CollectionTableViewCell.self,
                     indexPath: indexPath)
                 cell.config(image: itemIdentifier.collection.listCollection)
                 return cell
-            case 1:
+            case .newArrival:
                 let cell = tableView.dequeueReusableCell(
                     cell: NewArrivalTableViewCellTableViewCell.self,
                     indexPath: indexPath)
+                cell.configCell(arrFilter: ["All", "Apparel", "Dress", "Tshirt", "Bag"])
                 return cell
-            default:
+            case .none:
                 return UITableViewCell()
             }
+            
+//            switch indexPath.row {
+//            case 0:
+//                let cell = tableView.dequeueReusableCell(
+//                    cell: CollectionTableViewCell.self,
+//                    indexPath: indexPath)
+//                cell.config(image: itemIdentifier.collection.listCollection)
+//                return cell
+//            case 1:
+//                let cell = tableView.dequeueReusableCell(
+//                    cell: NewArrivalTableViewCellTableViewCell.self,
+//                    indexPath: indexPath)
+//                cell.configCell(arrFilter: ["All", "Apparel", "Dress", "Tshirt", "Bag"])
+//                return cell
+//            default:
+//                return UITableViewCell()
+//            }
             
         }
         dataSource?.defaultRowAnimation = .fade
@@ -98,23 +106,14 @@ private extension HomeViewController {
 
 extension HomeViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        switch indexPath.row {
-        case 0:
+        switch Section(rawValue: indexPath.section) {
+        case .collection:
             return 600
+        case .newArrival:
+            return 736
         default:
             return UITableView.automaticDimension
         }
     }
 }
 
-// MARK: - Binder
-private extension HomeViewController {
-    var repoSubscriber: Binder<[HomeModel]> {
-        Binder(self) {vc, repos in
-            var snapshot = NSDiffableDataSourceSnapshot<Section, HomeModel>()
-            snapshot.appendSections([.main])
-            snapshot.appendItems(repos, toSection: .main)
-            vc.dataSource?.apply(snapshot, animatingDifferences: true)
-        }
-    }
-}
